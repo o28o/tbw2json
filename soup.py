@@ -4,6 +4,8 @@ import sys
 from bs4 import BeautifulSoup
 import os
 import json
+import re
+
 
 # path to file from args
 file_path = sys.argv[1]
@@ -29,8 +31,8 @@ with open(file_path, 'r', encoding='utf-8') as file:
 soup = BeautifulSoup(html_content, 'html.parser')
 
 # lang list
-#languages = ['pi', 'en']
-languages = ['en']
+languages = ['pi', 'en']
+#languages = ['en']
 
 # iterate langs
 for lang in languages:
@@ -40,10 +42,12 @@ for lang in languages:
     # iterate throught <span class="parno"> inside <div lang="{lang}">
     for parno_tag in soup.select(f'div[lang="{lang}"] span.parno'):
         # get parno <span class="parno">
-        parno_number = parno_tag.get_text(strip=False)
+        parno_number = parno_tag.get_text(strip=True)
         # get text from parent element of the <span class="parno">,
         # exclude tag itself
-        parno_text = parno_tag.parent.get_text(strip=True).replace(parno_tag.get_text(strip=True), '')
+        parno_text = re.sub(r'<[^>]+>', ' ', parno_tag.parent.get_text())
+        #parno_text = parno_text.replace(parno_tag.get_text(strip=True), '')
+        #parno_text = parno_tag.parent.get_text(strip=True).replace(parno_tag.get_text(strip=True), '')
         # transform keys to format
         key = f"{filename}:{parno_number}"
         # add data to dict
